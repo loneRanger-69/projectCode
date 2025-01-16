@@ -19,18 +19,21 @@ function WeatherOverview() {
                     // OpenWeatherMap Current Weather API liefert keine direkte Regenwahrscheinlichkeit
                     // Wir können stattdessen die Regenmenge in den letzten Stunden betrachten
                     let rainProbability = "0%";
-                    if (data.rain && data.rain['1h']) {
-                        // Beispielhafte Umrechnung der Regenmenge in Wahrscheinlichkeit
-                        // Diese Logik kann je nach Anforderungen angepasst werden
-                        rainProbability = `${Math.min(Math.round(data.rain['1h'] * 10), 100)}%`;
-                    } else if (data.weather && data.weather.length > 0) {
-                        const weatherCondition = data.weather[0].main.toLowerCase();
-                        if (weatherCondition.includes("rain")) {
-                            rainProbability = "Hoch";
-                        } else {
-                            rainProbability = "Niedrig";
-                        }
-                    }
+                if (data.rain && data.rain['1h']) {
+                // Wenn es in der letzten Stunde geregnet hat, berechnen wir eine Wahrscheinlichkeit
+               // Basierend auf einer vereinfachten Umrechnung: 10 mm entsprechen etwa 100% Wahrscheinlichkeit
+                 rainProbability = `${Math.min(Math.round(data.rain['1h'] * 10), 100)}%`;
+}               else if (data.weather && data.weather.length > 0) {
+             // Wenn keine Regenmenge angegeben ist, beurteilen wir die Wahrscheinlichkeit anhand der Wetterbedingungen
+                 const weatherCondition = data.weather[0].main.toLowerCase();
+                if (weatherCondition.includes("rain")) {
+                rainProbability = "80%"; // Beispielwert für regnerische Bedingungen
+                } else if (weatherCondition.includes("drizzle")) {
+        rainProbability = "60%"; // Beispielwert für Nieselregen
+                } else if (weatherCondition.includes("clouds")) {
+        rainProbability = "30%"; // Beispielwert für bewölkte Bedingungen
+                }
+}
 
                     setWeather({ temperature, rainProbability });
                 } else {
