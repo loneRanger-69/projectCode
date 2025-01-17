@@ -1,7 +1,8 @@
 // Environment.jsx
-import WeatherOverview from "../components/Environment/WeatherOverview";
+
 import ForecastOverview from "../components/Environment/ForecastOverview";
 import SoilDataTable from "../components/Environment/SoilDataTable";
+import WeatherOverViewEnviroment from "../components/WeatherOverviewEnviroment";
 
 export default function Environment() {
     // Beispielhafte Forecast- und Feld-Daten (Mock-Daten)
@@ -37,10 +38,8 @@ export default function Environment() {
             <div className="flex flex-row w-full max-w-5xl mx-auto gap-4">
                 {/* Linke Box: aktuelle Wetterübersicht */}
                 <div className="flex-1 bg-blue-50 rounded-md p-4 shadow">
-                    <WeatherOverview
-                        location="Darmstadt"
-                        temperature={15}
-                        rainProb={30}
+                    <   WeatherOverViewEnviroment
+                        
                     />
                 </div>
 

@@ -59,10 +59,10 @@ function WeatherOverview() {
     return (
         <div className="bg-blue-100 rounded-lg p-6 shadow-md text-center">
             <h2 className="text-xl font-bold mb-4">Aktuelles Wetter</h2>
-            <p className="text-2xl font-bold text-white text-shadow">
+            <p className="text-xl font-bold text-black text">
                 Temperatur: <span>{weather.temperature}°C</span>
             </p>
-            <p className="text-2xl font-bold text-white text-shadow">
+            <p className="text-xl font-bold text-black text">
                 Regenwahrscheinlichkeit: <span>{weather.rainProbability}</span>
             </p>
         </div>

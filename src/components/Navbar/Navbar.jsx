@@ -1,3 +1,5 @@
+// src/components/Navbar/Navbar.jsx
+
 import { Link } from "react-router-dom";
 
 function Navbar() {
@@ -10,7 +12,10 @@ function Navbar() {
                     alt="Logo"
                     className="h-8 w-8"
                 />
-                <span className="text-lg font-bold">Agriculture Dashboard</span>
+                {/* "Agriculture Dashboard" als Link zur Startseite */}
+                <Link to="/" className="text-lg font-bold hover:text-gray-300">
+                    Agriculture Dashboard
+                </Link>
             </div>
 
             {/* Navigations-Links mittig */}
