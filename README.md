@@ -25,3 +25,15 @@ Wir verwenden PropTypes, um die Props unserer React-Komponenten zur Laufzeit zu 
 
    ```bash
    npm install prop-types
+
+
+3. **WetterAPI abfragen**:
+
+Wir verwenden Axios, um die HTTP-Anfragen durchzuführen
+
+   ```bash
+   npm install axios
+
+Man muss erstmal .env Datei in einem Verzeichnis erstellen, wo package.json sich befindet
+
+Dann muss dieser API Schlüssel 'VITE_APP_WEATHERMAP_API_KEY=8a89e1b64fb101893549ee684e73f02c' in .env kopiert werden.
