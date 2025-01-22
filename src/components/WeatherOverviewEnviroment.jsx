@@ -1,6 +1,6 @@
 // src/components/WeatherOverviewEnviroment.jsx
 
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import { getDarmstadtWeather } from "../services/weatherService";
 
 export default function WeatherOverviewEnviroment() {
@@ -8,43 +8,27 @@ export default function WeatherOverviewEnviroment() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Hardcodierter Standort
-    const location = 'Darmstadt';
+    const location = "Darmstadt";
 
     useEffect(() => {
         const fetchWeather = async () => {
             try {
+                // 1) API-Call -> Temperatur
                 const data = await getDarmstadtWeather();
 
-                // Überprüfe die Struktur der API-Antwort
-                if (data && data.main && typeof data.main.temp === 'number') {
-                    // Temperatur aufrunden
+                if (data && data.main && typeof data.main.temp === "number") {
+                    // Temperatur runden
                     const temperature = Math.round(data.main.temp);
 
-                    // Regenwahrscheinlichkeit berechnen
-                    let rainProbability = "0%";
-                    if (data.rain && data.rain['1h']) {
-                        // Wenn es in der letzten Stunde geregnet hat, berechnen wir eine Wahrscheinlichkeit
-                        // Basierend auf einer vereinfachten Umrechnung: 10 mm entsprechen etwa 100% Wahrscheinlichkeit
-                        rainProbability = `${Math.min(Math.round(data.rain['1h'] * 10), 100)}%`;
-                    } else if (data.weather && data.weather.length > 0) {
-                        // Wenn keine Regenmenge angegeben ist, beurteilen wir die Wahrscheinlichkeit anhand der Wetterbedingungen
-                        const weatherCondition = data.weather[0].main.toLowerCase();
-                        if (weatherCondition.includes("rain")) {
-                            rainProbability = "80%"; // Beispielwert für regnerische Bedingungen
-                        } else if (weatherCondition.includes("drizzle")) {
-                            rainProbability = "60%"; // Beispielwert für Nieselregen
-                        } else if (weatherCondition.includes("clouds")) {
-                            rainProbability = "30%"; // Beispielwert für bewölkte Bedingungen
-                        }
-                    }
+                    // 2) Regenwahrscheinlichkeit: wir erzeugen zufällig 0..100 %
+                    const rainProbability = `${Math.floor(Math.random() * 101)}%`;
 
                     setWeather({ temperature, rainProbability });
                 } else {
-                    throw new Error("Ungültige Datenstruktur von der API.");
+                    throw new Error("Ungültige Datenstruktur von der API (Wetter).");
                 }
             } catch (err) {
-                console.error("Fehler beim Laden der Wetterdaten in WeatherOverviewEnviroment:", err);
+                console.error("Fehler WeatherOverviewEnviroment:", err);
                 setError("Fehler beim Laden der Wetterdaten.");
             } finally {
                 setLoading(false);
@@ -71,11 +55,11 @@ export default function WeatherOverviewEnviroment() {
 
     return (
         <div className="bg-blue-100 rounded-lg p-6 shadow-md text-center">
-            <h2 className="text-xl font-bold mb-4"> {location}</h2>
-            <p className="text-l font text-black">
+            <h2 className="text-xl font-bold mb-4">{location}</h2>
+            <p className="text-l text-black">
                 Temperatur: <span>{weather.temperature}°C</span>
             </p>
-            <p className="text-l font text-black">
+            <p className="text-l text-black">
                 Regenwahrscheinlichkeit: <span>{weather.rainProbability}</span>
             </p>
         </div>

@@ -1,71 +1,154 @@
-// Environment.jsx
+// src/pages/Environment.jsx
 
+import { useState, useEffect } from "react";
+import axios from "axios";
 import ForecastOverview from "../components/Environment/ForecastOverview";
 import SoilDataTable from "../components/Environment/SoilDataTable";
-import WeatherOverViewEnviroment from "../components/WeatherOverviewEnviroment";
+import WeatherOverviewEnviroment from "../components/WeatherOverviewEnviroment";
+import FieldDetailsModal from "../components/Fields/FieldDetailsModal";
+import { getDarmstadtForecast } from "../services/weatherService";
 
 export default function Environment() {
-    // Beispielhafte Forecast- und Feld-Daten (Mock-Daten)
-    const mockForecastData = [
-        { date: "Mo 10.12.", temperature: 12, rainProb: 20 },
-        { date: "Di 11.12.", temperature: 10, rainProb: 40 },
-        { date: "Mi 12.12.", temperature: 8, rainProb: 50 },
-        { date: "Do 13.12.", temperature: 11, rainProb: 30 },
-        { date: "Fr 14.12.", temperature: 10, rainProb: 45 },
-    ];
+    // Felder
+    const [fields, setFields] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    const mockFieldsData = [
-        { id: 1, name: "Sojabohnen", ph: 6.3, moisture: 50, nutrients: 14.0 },
-        { id: 2, name: "Weizen", ph: 6.8, moisture: 45, nutrients: 12.5 },
-        { id: 3, name: "Frühlingszwiebeln", ph: 6.5, moisture: 55, nutrients: 13.2 },
-        { id: 4, name: "Mais", ph: 6.2, moisture: 50, nutrients: 14.8 },
-    ];
+    // Details-Modal
+    const [detailsField, setDetailsField] = useState(null);
 
-    // Beispiel-Callbacks für Buttons in der Tabelle
+    // Forecast
+    const [forecastData, setForecastData] = useState(null);
+    const [forecastError, setForecastError] = useState(null);
+
+    useEffect(() => {
+        fetchFields();
+        fetchForecast();
+    }, []);
+
+    // 1) Felder aus Backend
+    const fetchFields = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await axios.get("http://localhost:5000/fields");
+            setFields(response.data);
+        } catch (err) {
+            console.error("Fehler beim Abrufen der Felder:", err);
+            setError("Fehler beim Abrufen der Felder.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // 2) Forecast: (Aktuelles Weather + 5-Tage, je nach implementierung)
+    const fetchForecast = async () => {
+        try {
+            const data = await getDarmstadtForecast();
+            // data.list => ~40 Einträge à 3h => wir filtern 1 Eintrag pro Tag
+            const dailyEntries = data.list.filter((_, idx) => idx % 8 === 0);
+
+            // Regenwahrscheinlichkeit random (NUR für Forecast-Demo):
+            const transformed = dailyEntries.map((item) => {
+                const randomRain = Math.floor(Math.random() * 101);
+                return {
+                    date: new Date(item.dt_txt).toLocaleDateString("de-DE", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "numeric",
+                    }),
+                    temperature: Math.round(item.main.temp),
+                    rainProb: randomRain,
+                };
+            });
+            setForecastData(transformed);
+        } catch (err) {
+            console.error("Fehler beim Laden der Forecast-Daten:", err);
+            setForecastError("Konnte die 5-Tage-Vorhersage nicht abrufen.");
+        }
+    };
+
+    // 3) Button zum Simulieren von Felddaten
+    const handleSimulateData = async () => {
+        try {
+            // POST /fields/simulate => Erzeugt neue random Felddaten in DB
+            await axios.post("http://localhost:5000/fields/simulate");
+            // Danach neu laden
+            await fetchFields();
+        } catch (simulateErr) {
+            console.error("Fehler beim Simulieren der Daten:", simulateErr);
+            setError("Fehler beim Simulieren der Sensordaten.");
+        }
+    };
+
+    // Aktionen in der Tabelle
     const handleShowDetails = (field) => {
-        console.log("Details für Feld:", field);
-        // TODO: Modal öffnen o.ä.
+        setDetailsField(field);
     };
 
     const handleStartAnalysis = (field) => {
-        console.log("Analyse für Feld:", field);
-        // TODO: Analyse starten (Modal, Popup, etc.)
+        console.log("Analyse starten für Feld:", field);
     };
 
     return (
         <div className="pt-16 flex flex-col items-start min-h-screen bg-gray-100 px-6">
-            {/* Wetterbereich: Weather + Forecast nebeneinander */}
+            {/* 1) Wetterbereich */}
             <div className="flex flex-row w-full max-w-5xl mx-auto gap-4">
-                {/* Linke Box: aktuelle Wetterübersicht */}
+                {/* Links: aktuelles Wetter */}
                 <div className="flex-1 bg-blue-50 rounded-md p-4 shadow">
-                    <   WeatherOverViewEnviroment
-                        
-                    />
+                    <WeatherOverviewEnviroment />
                 </div>
 
-                {/* Rechte Box: 5-Tage-Prognose */}
+                {/* Rechts: 5-Tage-Prognose */}
                 <div className="flex-1 bg-blue-50 rounded-md p-4 shadow">
-                    <ForecastOverview forecastData={mockForecastData} />
+                    {forecastError && (
+                        <div className="text-red-500 mb-2">{forecastError}</div>
+                    )}
+                    <ForecastOverview forecastData={forecastData} />
                 </div>
             </div>
 
-            {/* Bodendaten-Tabelle */}
+            {/* 2) Bodendaten-Tabelle */}
             <div className="w-full max-w-5xl mx-auto mt-6 bg-white p-4 rounded shadow">
                 <h2 className="text-xl font-bold mb-4">Bodendaten pro Feld</h2>
-                <SoilDataTable
-                    fields={mockFieldsData}
-                    onShowDetails={handleShowDetails}
-                    onStartAnalysis={handleStartAnalysis}
-                />
+                {error && <div className="text-red-500 mb-2">{error}</div>}
+
+                {isLoading ? (
+                    <p>Lade Felder...</p>
+                ) : (
+                    <SoilDataTable
+                        fields={fields}
+                        onShowDetails={handleShowDetails}
+                        onStartAnalysis={handleStartAnalysis}
+                    />
+                )}
+
+                {/* Button: Neue Zufalls-Sensordaten */}
+                <div className="mt-4">
+                    <button
+                        onClick={handleSimulateData}
+                        className="bg-orange-500 text-white px-4 py-2 rounded"
+                    >
+                        Sensordaten abfragen
+                    </button>
+                </div>
             </div>
 
-            {/* Platzhalter für Diagramme oder andere Bereiche */}
+            {/* 3) Platz für Diagramme o.Ä. */}
             <div className="w-full max-w-5xl mx-auto mt-8 bg-white p-4 rounded shadow">
                 <h2 className="text-lg font-bold mb-2">Diagramme oder zusätzliche Infos</h2>
                 <p className="text-sm text-gray-600">
-                    Hier ist ein Platzhalter für z. B. pH-Verlauf, Feuchtigkeitsverlauf, etc. sobald ein Feld ausgewählt ist.
+                    Hier kannst du pH-Verlauf, Feuchtigkeitsverlauf etc. anzeigen.
                 </p>
             </div>
+
+            {/* 4) Modal: Feld-Details */}
+            {detailsField && (
+                <FieldDetailsModal
+                    field={detailsField}
+                    onClose={() => setDetailsField(null)}
+                />
+            )}
         </div>
     );
 }

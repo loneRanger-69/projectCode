@@ -17,8 +17,8 @@ export default function SoilDataTable({ fields, onShowDetails, onStartAnalysis }
             {fields.map((field) => (
                 <tr key={field.id} className="border-b">
                     <td className="px-4 py-2">{field.name}</td>
-                    <td className="px-4 py-2">{field.ph}</td>
-                    <td className="px-4 py-2">{field.moisture}%</td>
+                    <td className="px-4 py-2">{field.ph_value}</td>
+                    <td className="px-4 py-2">{field.moisture}</td>
                     <td className="px-4 py-2">{field.nutrients}</td>
                     <td className="px-4 py-2">
                         <button
@@ -46,11 +46,11 @@ export default function SoilDataTable({ fields, onShowDetails, onStartAnalysis }
 SoilDataTable.propTypes = {
     fields: PropTypes.arrayOf(
         PropTypes.shape({
-            id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]), // oder .number, falls du sicher bist
-            name: PropTypes.string.isRequired,
-            ph: PropTypes.number,
-            moisture: PropTypes.number,
-            nutrients: PropTypes.number,
+            id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            name: PropTypes.string,
+            ph_value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            moisture: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            nutrients: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         })
     ).isRequired,
     onShowDetails: PropTypes.func.isRequired,

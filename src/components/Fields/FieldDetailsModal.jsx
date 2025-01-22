@@ -8,24 +8,12 @@ export default function FieldDetailsModal({ field, onClose }) {
             <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
                 <h2 className="text-xl font-bold mb-4">Feld-Details</h2>
                 <ul className="space-y-2">
-                    <li>
-                        <strong>Feldname:</strong> {field.name || "N/A"}
-                    </li>
-                    <li>
-                        <strong>Größe (ha):</strong> {field.size || "N/A"}
-                    </li>
-                    <li>
-                        <strong>Status:</strong> {field.status || "N/A"}
-                    </li>
-                    <li>
-                        <strong>pH-Wert:</strong> {field.ph || "N/A"}
-                    </li>
-                    <li>
-                        <strong>Feuchtigkeit:</strong> {field.moisture || "N/A"}
-                    </li>
-                    <li>
-                        <strong>Nährstoffe (g/m²):</strong> {field.nutrients || "N/A"}
-                    </li>
+                    <li><strong>Feldname:</strong> {field.name || "N/A"}</li>
+                    <li><strong>Größe (ha):</strong> {field.size || "N/A"}</li>
+                    <li><strong>Status:</strong> {field.status || "N/A"}</li>
+                    <li><strong>pH-Wert:</strong> {field.ph_value || "N/A"}</li>
+                    <li><strong>Feuchtigkeit:</strong> {field.moisture || "N/A"}</li>
+                    <li><strong>Nährstoffe (g/m²):</strong> {field.nutrients || "N/A"}</li>
                 </ul>
                 <div className="mt-4 text-right">
                     <button
@@ -45,9 +33,9 @@ FieldDetailsModal.propTypes = {
         name: PropTypes.string,
         size: PropTypes.number,
         status: PropTypes.string,
-        ph: PropTypes.number,
-        moisture: PropTypes.number,
-        nutrients: PropTypes.number,
-    }).isRequired,
+        ph_value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        moisture: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        nutrients: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    }),
     onClose: PropTypes.func.isRequired,
 };
