@@ -28,11 +28,13 @@ router.get("/:id", async (req, res) => {
     }
 });
 
+// src/routes/fields.js
+
 // POST: Neues Feld hinzufügen
 router.post("/", async (req, res) => {
     try {
         const {
-            name, size, status, ph_value, moisture, nutrients
+            name, size, status, ph_value, moisture, nutrients, crop
         } = req.body;
 
         const newField = await db("fields")
@@ -43,6 +45,7 @@ router.post("/", async (req, res) => {
                 ph_value,
                 moisture,
                 nutrients,
+                crop, // Neu: Saatgut
             })
             .returning("*");
 
@@ -71,6 +74,7 @@ router.put("/:id", async (req, res) => {
         res.status(500).json({ error: "Fehler beim Aktualisieren des Feldes" });
     }
 });
+
 
 // DELETE: Feld löschen
 router.delete("/:id", async (req, res) => {

@@ -124,7 +124,7 @@ const handleFilterSize = (size) => {
                                             type="text"
                                             value={editField.name}
                                             onChange={(e) =>
-                                                setEditField({ ...editField, name: e.target.value })
+                                                setEditField({...editField, name: e.target.value})
                                             }
                                             className="w-full border border-gray-300 bg-white text-black px-2 py-1 rounded"
                                         />
@@ -135,7 +135,7 @@ const handleFilterSize = (size) => {
                                             type="number"
                                             value={editField.size}
                                             onChange={(e) =>
-                                                setEditField({ ...editField, size: e.target.value })
+                                                setEditField({...editField, size: e.target.value})
                                             }
                                             className="w-full border border-gray-300 bg-white text-black px-2 py-1 rounded"
                                         />
@@ -146,10 +146,26 @@ const handleFilterSize = (size) => {
                                             type="text"
                                             value={editField.status}
                                             onChange={(e) =>
-                                                setEditField({ ...editField, status: e.target.value })
+                                                setEditField({...editField, status: e.target.value})
                                             }
                                             className="w-full border border-gray-300 bg-white text-black px-2 py-1 rounded"
                                         />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="block text-sm font-medium text-black">Saatgut:</label>
+                                        <select
+                                            value={editField.crop || ""}
+                                            onChange={(e) =>
+                                                setEditField({...editField, crop: e.target.value})
+                                            }
+                                            className="w-full border border-gray-300 bg-white text-black px-2 py-1 rounded"
+                                        >
+                                            <option value="">Bitte wählen</option>
+                                            <option value="Sojabohnen">Sojabohnen</option>
+                                            <option value="Weizen">Weizen</option>
+                                            <option value="Mais">Mais</option>
+                                            <option value="Kartoffeln">Kartoffeln</option>
+                                        </select>
                                     </div>
                                     <button
                                         type="submit"
@@ -242,6 +258,22 @@ const handleFilterSize = (size) => {
                                             className="w-full border border-gray-300 bg-white text-black px-2 py-1 rounded"
                                         />
                                     </div>
+                                    <div className="mb-2">
+                                        <label className="block text-sm font-medium text-black">Saatgut:</label>
+                                        <select
+                                            value={newField.crop || ""}
+                                            onChange={(e) =>
+                                                setNewField({...newField, crop: e.target.value})
+                                            }
+                                            className="w-full border border-gray-300 bg-white text-black px-2 py-1 rounded"
+                                        >
+                                            <option value="">Bitte wählen</option>
+                                            <option value="Sojabohnen">Sojabohnen</option>
+                                            <option value="Weizen">Weizen</option>
+                                            <option value="Mais">Mais</option>
+                                            <option value="Kartoffeln">Kartoffeln</option>
+                                        </select>
+                                    </div>
                                     <button
                                         type="submit"
                                         className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -261,7 +293,7 @@ const handleFilterSize = (size) => {
 
                         <FieldTable
                             fields={filteredFields.length > 0 ? filteredFields : fields}
-                            onDetails={(field) => setDetailsField(field)}                            onEdit={(field) => setEditField(field)}
+                            onDetails={(field) => setDetailsField(field)} onEdit={(field) => setEditField(field)}
                             onDelete={(fieldId) => handleDeleteField(fieldId)}
                         />
 

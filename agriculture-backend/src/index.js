@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import fieldRoutes from "./routes/fields.js";
+import analysisRoutes from "./routes/analysis.js";
 
 const app = express();
 const PORT = 5000;
@@ -12,6 +13,7 @@ app.use(bodyParser.json()); // Verarbeitet JSON-Anfragen
 
 // Routen
 app.use("/fields", fieldRoutes);
+app.use("/analysis", analysisRoutes);
 
 // Fehlerbehandlung für nicht gefundene Routen
 app.use((req, res, next) => {

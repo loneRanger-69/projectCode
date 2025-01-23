@@ -11,6 +11,7 @@ export default function FieldDetailsModal({ field, onClose }) {
                     <li><strong>Feldname:</strong> {field.name || "N/A"}</li>
                     <li><strong>Größe (ha):</strong> {field.size || "N/A"}</li>
                     <li><strong>Status:</strong> {field.status || "N/A"}</li>
+                    <li><strong>Saatgut:</strong> {field.crop || "N/A"}</li>
                     <li><strong>pH-Wert:</strong> {field.ph_value || "N/A"}</li>
                     <li><strong>Feuchtigkeit:</strong> {field.moisture || "N/A"}</li>
                     <li><strong>Nährstoffe (g/m²):</strong> {field.nutrients || "N/A"}</li>
@@ -33,6 +34,7 @@ FieldDetailsModal.propTypes = {
         name: PropTypes.string,
         size: PropTypes.number,
         status: PropTypes.string,
+        crop: PropTypes.string,
         ph_value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         moisture: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         nutrients: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

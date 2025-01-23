@@ -13,7 +13,7 @@ async function migrate() {
                 table.float("ph_value").defaultTo(null);
                 table.float("moisture").defaultTo(null);
                 table.float("nutrients").defaultTo(null);
-                table.float("rain_probability").defaultTo(null);
+                table.float("crop").defaultTo(null);
             });
             console.log("Tabelle 'fields' erfolgreich erstellt.");
         } else {
@@ -37,6 +37,13 @@ async function migrate() {
                     table.float("nutrients").defaultTo(null);
                 });
                 console.log("Spalte 'nutrients' erfolgreich hinzugefügt.");
+            }
+
+            if (!columnInfo.crop) {
+                await db.schema.alterTable("fields", (table) => {
+                    table.string("crop").defaultTo(null); // Neue Spalte für Saatgut
+                });
+                console.log("Spalte 'crop' erfolgreich hinzugefügt.");
             }
 
         }

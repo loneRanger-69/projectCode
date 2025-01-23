@@ -86,9 +86,20 @@ export default function Environment() {
         setDetailsField(field);
     };
 
-    const handleStartAnalysis = (field) => {
-        console.log("Analyse starten für Feld:", field);
+// src/pages/Environment.jsx
+    const handleStartAnalysis = async (field) => {
+        try {
+            const response = await axios.get(
+                `http://localhost:5000/analysis/${field.id}/optimize-nutrients`
+            );
+            const { message } = response.data;
+            alert(message); // Zeige das Analyseergebnis als Popup
+        } catch (err) {
+            console.error("Fehler bei der Analyse:", err);
+            alert("Analyse fehlgeschlagen.");
+        }
     };
+
 
     return (
         <div className="pt-16 flex flex-col items-start min-h-screen bg-gray-100 px-6">
@@ -129,7 +140,7 @@ export default function Environment() {
                         onClick={handleSimulateData}
                         className="bg-orange-500 text-white px-4 py-2 rounded"
                     >
-                        Sensordaten abfragen
+                        Sensordaten aktualisieren
                     </button>
                 </div>
             </div>
