@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
 
-
 export default function FieldSearchAndFilter({ onSearch, onFilterStatus, onFilterSize }) {
     const [isStatusOpen, setIsStatusOpen] = useState(false);
     const [isSizeOpen, setIsSizeOpen] = useState(false);
@@ -26,6 +25,54 @@ export default function FieldSearchAndFilter({ onSearch, onFilterStatus, onFilte
                 </button>
                 {isStatusOpen && (
                     <div className="absolute bg-white text-black shadow-lg rounded mt-2 z-10">
+                        {/* NEUE Status-Buttons */}
+                        <button
+                            onClick={() => {
+                                onFilterStatus("Bepflanzt");
+                                setIsStatusOpen(false);
+                            }}
+                            className="bg-white block px-4 py-2 w-full text-left"
+                        >
+                            Bepflanzt
+                        </button>
+                        <button
+                            onClick={() => {
+                                onFilterStatus("Brachliegend");
+                                setIsStatusOpen(false);
+                            }}
+                            className="bg-white block px-4 py-2 w-full text-left"
+                        >
+                            Brachliegend
+                        </button>
+                        <button
+                            onClick={() => {
+                                onFilterStatus("Ernte");
+                                setIsStatusOpen(false);
+                            }}
+                            className="bg-white block px-4 py-2 w-full text-left"
+                        >
+                            Ernte
+                        </button>
+                        <button
+                            onClick={() => {
+                                onFilterStatus("Wachstum");
+                                setIsStatusOpen(false);
+                            }}
+                            className="bg-white block px-4 py-2 w-full text-left"
+                        >
+                            Wachstum
+                        </button>
+                        <button
+                            onClick={() => {
+                                onFilterStatus("Aussaat");
+                                setIsStatusOpen(false);
+                            }}
+                            className="bg-white block px-4 py-2 w-full text-left"
+                        >
+                            Aussaat
+                        </button>
+
+                        {/* ALTE Status-Buttons */}
                         <button
                             onClick={() => {
                                 onFilterStatus("Bewässerung");

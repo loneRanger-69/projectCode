@@ -31,7 +31,7 @@ export default function Environment() {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await axios.get("http://localhost:5000/fields");
+            const response = await axios.get("http://localhost:5001/fields");
             setFields(response.data);
         } catch (err) {
             console.error("Fehler beim Abrufen der Felder:", err);
@@ -72,7 +72,7 @@ export default function Environment() {
     const handleSimulateData = async () => {
         try {
             // POST /fields/simulate => Erzeugt neue random Felddaten in DB
-            await axios.post("http://localhost:5000/fields/simulate");
+            await axios.post("http://localhost:5001/fields/simulate");
             // Danach neu laden
             await fetchFields();
         } catch (simulateErr) {
@@ -87,18 +87,41 @@ export default function Environment() {
     };
 
 // src/pages/Environment.jsx
-    const handleStartAnalysis = async (field) => {
-        try {
-            const response = await axios.get(
-                `http://localhost:5000/analysis/${field.id}/optimize-nutrients`
-            );
-            const { message } = response.data;
-            alert(message); // Zeige das Analyseergebnis als Popup
-        } catch (err) {
-            console.error("Fehler bei der Analyse:", err);
-            alert("Analyse fehlgeschlagen.");
-        }
-    };
+const handleStartAnalysis = async (field) => {
+    try {
+        // 1) Nährstoffanalyse
+        const nutrientResponse = await axios.get(
+            `http://localhost:5001/analysis/${field.id}/optimize-nutrients`
+        );
+        const nutrientMessage = nutrientResponse.data.message || "Die Nährstoffanalyse konnte keine spezifischen Empfehlungen liefern.";
+
+        // 2) Wasseranalyse
+        const waterResponse = await axios.get(
+            `http://localhost:5001/analysis/${field.id}/water-consumption`
+        );
+        //const recommendedIrrigation = waterResponse.data.recommendedIrrigation || 0;
+        const waterInfo = waterResponse.data.info || "Es liegen keine zusätzlichen Informationen zur Wasseranalyse vor.";
+
+        // Höflichere Zusammenführung der Nachrichten
+        const combinedMessage = `
+Hier sind die Ergebnisse Ihrer Analysen:
+
+**Nährstoffanalyse:**
+${nutrientMessage}
+
+**Wasseranalyse:**
+${waterInfo}
+
+
+        `.trim();
+
+        alert(combinedMessage);
+
+    } catch (err) {
+        console.error("Fehler bei der Analyse:", err);
+        alert("Leider ist bei der Analyse ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.");
+    }
+};
 
 
     return (

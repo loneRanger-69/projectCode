@@ -1,11 +1,13 @@
+// src/index.js
+
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import fieldRoutes from "./routes/fields.js";
-import analysisRoutes from "./routes/analysis.js";
+import analysisRoutes from "./routes/analysis.js"; // Import der analysisRoutes
 
 const app = express();
-const PORT = 5000;
+const PORT = 5001;
 
 // Middleware
 app.use(cors()); // Erlaubt Cross-Origin-Anfragen
@@ -13,7 +15,7 @@ app.use(bodyParser.json()); // Verarbeitet JSON-Anfragen
 
 // Routen
 app.use("/fields", fieldRoutes);
-app.use("/analysis", analysisRoutes);
+app.use("/analysis", analysisRoutes); // Nutzung der analysisRoutes
 
 // Fehlerbehandlung für nicht gefundene Routen
 app.use((req, res, next) => {

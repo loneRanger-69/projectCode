@@ -4,4 +4,5 @@ export const cropOptimalValues = {
     Weizen: { optimalPh: 6.8, optimalNutrients: 12 },
     Mais: { optimalPh: 6.2, optimalNutrients: 18 },
     Kartoffeln: { optimalPh: 5.8, optimalNutrients: 14 },
+    Apfel: {optimalPh: 6.4, optimalNutrients: 20}
 };
