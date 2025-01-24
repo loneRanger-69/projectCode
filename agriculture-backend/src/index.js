@@ -5,6 +5,8 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import fieldRoutes from "./routes/fields.js";
 import analysisRoutes from "./routes/analysis.js"; // Import der analysisRoutes
+import kpisRoutes from "./routes/kpis.js";
+import todoRoutes from "./routes/todo.js";
 
 const app = express();
 const PORT = 5001;
@@ -16,6 +18,8 @@ app.use(bodyParser.json()); // Verarbeitet JSON-Anfragen
 // Routen
 app.use("/fields", fieldRoutes);
 app.use("/analysis", analysisRoutes); // Nutzung der analysisRoutes
+app.use("/kpis", kpisRoutes);
+app.use("/todos", todoRoutes);
 
 // Fehlerbehandlung für nicht gefundene Routen
 app.use((req, res, next) => {
