@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 
 export default function FieldDetailsModal({ field, onClose }) {
+    // Prüfe, ob `field` definiert ist
     if (!field) return null;
 
     return (

@@ -1,7 +1,6 @@
 // src/components/WeatherOverviewEnviroment.jsx
-
 import { useEffect, useState } from "react";
-import { getDarmstadtWeather } from "../services/weatherService";
+import { getDarmstadtWeather, getWeatherData } from "../services/weatherService";
 
 export default function WeatherOverviewEnviroment() {
     const [weather, setWeather] = useState({ temperature: null, rainProbability: null });
@@ -13,20 +12,31 @@ export default function WeatherOverviewEnviroment() {
     useEffect(() => {
         const fetchWeather = async () => {
             try {
-                // 1) API-Call -> Temperatur
-                const data = await getDarmstadtWeather();
+                // 1) Aktuelles Wetter von OpenWeather
+                // 2) Datenbank-Wetter (z. B. januaryDates etc.)
+                const [apiWeather, dbData] = await Promise.all([
+                    getDarmstadtWeather(),
+                    getWeatherData(),
+                ]);
 
-                if (data && data.main && typeof data.main.temp === "number") {
-                    // Temperatur runden
-                    const temperature = Math.round(data.main.temp);
+                // Heutiges Datum "YYYY-MM-DD"
+                const todayISO = new Date().toISOString().split("T")[0];
+                // Passenden Eintrag für heute holen
+                const todayEntry = dbData.find((entry) => entry.date === todayISO);
 
-                    // 2) Regenwahrscheinlichkeit: wir erzeugen zufällig 0..100 %
-                    const rainProbability = `${Math.floor(Math.random() * 101)}%`;
-
-                    setWeather({ temperature, rainProbability });
-                } else {
-                    throw new Error("Ungültige Datenstruktur von der API (Wetter).");
+                if (!apiWeather || !apiWeather.main) {
+                    throw new Error("Ungültige OpenWeather-Daten");
                 }
+                if (!todayEntry) {
+                    throw new Error(`Kein Eintrag in daily_weather für ${todayISO}`);
+                }
+
+                // Temperatur
+                const temperature = Math.round(apiWeather.main.temp);
+                // Regenwahrscheinlichkeit aus DB
+                const rainProbability = todayEntry.rain_probability;
+
+                setWeather({ temperature, rainProbability });
             } catch (err) {
                 console.error("Fehler WeatherOverviewEnviroment:", err);
                 setError("Fehler beim Laden der Wetterdaten.");
@@ -34,6 +44,8 @@ export default function WeatherOverviewEnviroment() {
                 setLoading(false);
             }
         };
+
+        // fetchWeather aufrufen
         fetchWeather();
     }, []);
 
@@ -60,7 +72,7 @@ export default function WeatherOverviewEnviroment() {
                 Temperatur: <span>{weather.temperature}°C</span>
             </p>
             <p className="text-l text-black">
-                Regenwahrscheinlichkeit: <span>{weather.rainProbability}</span>
+                Regenwahrscheinlichkeit: <span>{weather.rainProbability}%</span>
             </p>
         </div>
     );

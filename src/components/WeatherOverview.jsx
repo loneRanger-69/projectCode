@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { getDarmstadtWeather } from "../services/weatherService";
+import { useEffect, useState } from "react";
+import { getDarmstadtWeather, getWeatherData } from "../services/weatherService";
 
 function WeatherOverview() {
     const [weather, setWeather] = useState({ temperature: null, rainProbability: null });
@@ -9,53 +9,59 @@ function WeatherOverview() {
     useEffect(() => {
         const fetchWeather = async () => {
             try {
-                const data = await getDarmstadtWeather();
-                console.log("Wetterdaten in WeatherOverview:", data); // Debugging
+                // Hole aktuelle Wetterdaten von OpenWeather (Temperatur) und lokale DB-Werte (Regenwahrscheinlichkeit)
+                const [apiWeather, dbData] = await Promise.all([
+                    getDarmstadtWeather(),
+                    getWeatherData(),
+                ]);
 
-                // Überprüfe die Struktur der API-Antwort
-                if (data && data.main && typeof data.main.temp === 'number') {
-                    const temperature = Math.round(data.main.temp);
+                // Heutiges Datum im Format YYYY-MM-DD
+                const todayISO = new Date().toISOString().split("T")[0];
+                // Passenden Eintrag in dbData suchen, z. B. { date: '2025-01-15', rain_probability: 80, ... }
+                const todayEntry = dbData.find((entry) => entry.date === todayISO);
 
-                    // OpenWeatherMap Current Weather API liefert keine direkte Regenwahrscheinlichkeit
-                    // Wir können stattdessen die Regenmenge in den letzten Stunden betrachten
-                    let rainProbability = "0%";
-                if (data.rain && data.rain['1h']) {
-                // Wenn es in der letzten Stunde geregnet hat, berechnen wir eine Wahrscheinlichkeit
-               // Basierend auf einer vereinfachten Umrechnung: 10 mm entsprechen etwa 100% Wahrscheinlichkeit
-                 rainProbability = `${Math.min(Math.round(data.rain['1h'] * 10), 100)}%`;
-}               else if (data.weather && data.weather.length > 0) {
-             // Wenn keine Regenmenge angegeben ist, beurteilen wir die Wahrscheinlichkeit anhand der Wetterbedingungen
-                 const weatherCondition = data.weather[0].main.toLowerCase();
-                if (weatherCondition.includes("rain")) {
-                rainProbability = "80%"; // Beispielwert für regnerische Bedingungen
-                } else if (weatherCondition.includes("drizzle")) {
-        rainProbability = "60%"; // Beispielwert für Nieselregen
-                } else if (weatherCondition.includes("clouds")) {
-        rainProbability = "30%"; // Beispielwert für bewölkte Bedingungen
+                // Fehlerprüfung: existieren OpenWeather-Daten?
+                if (!apiWeather || !apiWeather.main) {
+                    throw new Error("Ungültige OpenWeather-Daten.");
                 }
-}
-
-                    setWeather({ temperature, rainProbability });
-                } else {
-                    throw new Error("Ungültige Datenstruktur von der API.");
+                // Fehlerprüfung: existiert ein Eintrag in daily_weather für heute?
+                if (!todayEntry) {
+                    throw new Error(`Kein Eintrag in daily_weather für ${todayISO}.`);
                 }
+
+                // Temperatur aus der OpenWeatherMap-Antwort
+                const temperature = Math.round(apiWeather.main.temp);
+                // Regenwahrscheinlichkeit aus deiner DB
+                const rainProbability = todayEntry.rain_probability;
+
+                setWeather({ temperature, rainProbability });
             } catch (err) {
-                console.error("Fehler beim Laden der Wetterdaten in WeatherOverview:", err);
+                console.error("Fehler in WeatherOverview:", err);
                 setError("Fehler beim Laden der Wetterdaten.");
             } finally {
                 setLoading(false);
             }
         };
+
         fetchWeather();
     }, []);
 
     if (loading) {
-        return <div className="bg-blue-100 rounded-lg p-6 shadow-md text-center">Lädt...</div>;
+        return (
+            <div className="bg-blue-100 rounded-lg p-6 shadow-md text-center">
+                Lädt...
+            </div>
+        );
     }
 
     if (error) {
-        return <div className="bg-red-100 rounded-lg p-6 shadow-md text-center text-red-700">{error}</div>;
+        return (
+            <div className="bg-red-100 rounded-lg p-6 shadow-md text-center text-red-700">
+                {error}
+            </div>
+        );
     }
+
     return (
         <div className="bg-blue-100 rounded-lg p-6 shadow-md text-center">
             <h2 className="text-xl font-bold mb-4">Aktuelles Wetter</h2>
@@ -63,7 +69,7 @@ function WeatherOverview() {
                 Temperatur: <span>{weather.temperature}°C</span>
             </p>
             <p className="text-xl font-bold text-black text">
-                Regenwahrscheinlichkeit: <span>{weather.rainProbability}</span>
+                Regenwahrscheinlichkeit: <span>{weather.rainProbability}%</span>
             </p>
         </div>
     );

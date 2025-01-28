@@ -1,11 +1,10 @@
-// src/Service/analyseService.js
-
 import { getFieldById } from "./fieldService.js";
 import { cropOptimalValues } from "../data/cropOptimalValues.js";
+import { fetchWeatherDataFromDB } from "../routes/weather.js"; // Importiere Wetterdaten aus der Route
 
 /**
  * Wasserverbrauchsanalyse
- * Berechnet den empfohlenen Wasserverbrauch basierend auf Felddaten.
+ * Berechnet den empfohlenen Wasserverbrauch basierend auf Felddaten und Wetterbedingungen.
  * @param {number|string} fieldId - Die ID des Feldes.
  * @returns {Promise<Object>} - Das Analyseergebnis.
  */
@@ -18,24 +17,47 @@ export async function waterConsumptionAnalysis(fieldId) {
         }
         console.log(`Felddaten:`, field);
 
-        // Berechnung: Empfohlene Bewässerungsmenge (Liter pro Tag)
-        let factor;
-        if (field.moisture < 50) {
-            factor = 800; // Liter pro Hektar pro Tag
-        } else if (field.moisture >= 50 && field.moisture <= 70) {
-            factor = 500;
-        } else {
-            factor = 200;
-        }
-        const recommendedIrrigation = field.size * factor;
+        // Heutiges Wetter aus der DB abrufen
+        const todayISO = new Date().toISOString().split("T")[0];
+        const weatherData = await fetchWeatherDataFromDB(); // Wetterdaten aus der DB abrufen
+        const todayWeather = weatherData.find((entry) => entry.date === todayISO);
 
-        console.log(`Empfohlene Bewässerung: ${recommendedIrrigation} Liter`);
+        if (!todayWeather) {
+            throw new Error(`Keine Wetterdaten für das heutige Datum (${todayISO}) gefunden.`);
+        }
+
+        const rainProbability = todayWeather.rain_probability;
+        const temperature = todayWeather.temperature || 25; // Fallback auf 25°C
+
+        console.log(`Wetterdaten für heute: Regenwahrscheinlichkeit: ${rainProbability}%, Temperatur: ${temperature}°C`);
+
+        // Berechnung des Wasserbedarfs
+        const cropBaseWaterNeed = {
+            Sojabohnen: 30, // Basismenge in mm pro Tag
+            Weizen: 25,
+            Mais: 35,
+            Kartoffeln: 20,
+        };
+
+        const crop = field.crop || "Allgemein";
+        const baseNeed = cropBaseWaterNeed[crop] || 25; // Default-Wert zu 25 mm
+        const rainAdjustment = (rainProbability / 100) * -baseNeed * 0.8; // Bis zu -80% bei 100% Regen
+        const temperatureAdjustment = temperature > 25 ? (temperature - 25) * 2 : 0; // +2 mm pro °C über 25°C
+        const soilMoistureAdjustment = field.moisture < 30 ? 10 : 0; // +10 mm bei niedriger Feuchtigkeit
+
+        const waterNeedPerHectare = Math.max(0, baseNeed + rainAdjustment + temperatureAdjustment + soilMoistureAdjustment);
+        const totalWaterNeed = field.size * waterNeedPerHectare; // Gesamtwasserbedarf
+
+        console.log(`Wasserbedarf pro Hektar: ${waterNeedPerHectare} mm, Gesamtwasserbedarf: ${totalWaterNeed} Liter`);
 
         return {
             fieldId: field.id,
             fieldName: field.name,
-            recommendedIrrigation, // Gesamtmenge in Litern
-            info: `Empfehlung: Bewässere Feld '${field.name}' mit ca. ${recommendedIrrigation} Litern pro Tag.`
+            rainProbability,
+            temperature,
+            waterNeedPerHectare,
+            totalWaterNeed, // Gesamtmenge in Litern
+            message: `Empfohlene Bewässerung: Feld '${field.name}' benötigt ca. ${totalWaterNeed.toFixed(1)} Liter Wasser pro Tag basierend auf den aktuellen Wetterbedingungen.`,
         };
     } catch (error) {
         console.error("Fehler in waterConsumptionAnalysis:", error);
@@ -80,10 +102,31 @@ export async function optimizeNutrients(fieldId) {
             phAdjustment: phAdjustment.toFixed(1),
             message: `Für ${crop} sollte der pH-Wert um ${phAdjustment.toFixed(
                 1
-            )} angepasst werden. Die Nährstoffe sollten um ${nutrientAdjustment.toFixed(1)} kg/ha geändert werden.`
+            )} angepasst werden. Die Nährstoffe sollten um ${nutrientAdjustment.toFixed(1)} kg/ha geändert werden.`,
         };
     } catch (error) {
         console.error("Fehler in optimizeNutrients:", error);
+        throw error;
+    }
+}
+
+/**
+ * Kombination beider Analysen: Wasserverbrauch und Nährstoffoptimierung
+ * @param {number|string} fieldId - Die ID des Feldes.
+ * @returns {Promise<Object>} - Kombiniertes Analyseergebnis.
+ */
+export async function combinedAnalysis(fieldId) {
+    try {
+        const waterAnalysis = await waterConsumptionAnalysis(fieldId);
+        const nutrientAnalysis = await optimizeNutrients(fieldId);
+
+        return {
+            waterAnalysis,
+            nutrientAnalysis,
+            message: `Analyse abgeschlossen für Feld '${waterAnalysis.fieldName}'`,
+        };
+    } catch (error) {
+        console.error("Fehler in combinedAnalysis:", error);
         throw error;
     }
 }

@@ -6,18 +6,22 @@ import ForecastOverview from "../components/Environment/ForecastOverview";
 import SoilDataTable from "../components/Environment/SoilDataTable";
 import WeatherOverviewEnviroment from "../components/WeatherOverviewEnviroment";
 import FieldDetailsModal from "../components/Fields/FieldDetailsModal";
+import AnalysisModal from "../components/Fields/AnalysisModal.jsx"; // Neues Modal für Analyse
+import PhChart from "../components/Environment/PHChart.jsx"; // PhChart hinzufügen
 import { getDarmstadtForecast } from "../services/weatherService";
+import { getWeatherData } from "../services/weatherService";
+import { fetchPhHistory, simulatePhData } from "../services/phService"; // Importiere Simulationsfunktion
 
 export default function Environment() {
-    // Felder
     const [fields, setFields] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Details-Modal
-    const [detailsField, setDetailsField] = useState(null);
+    const [detailsField, setDetailsField] = useState(null); // Details
+    const [analysisField, setAnalysisField] = useState(null); // Analyse
+    const [phData, setPhData] = useState([]); // pH-Daten für das Diagramm
+    const [selectedFieldId, setSelectedFieldId] = useState(null); // Feld für pH-Diagramm
 
-    // Forecast
     const [forecastData, setForecastData] = useState(null);
     const [forecastError, setForecastError] = useState(null);
 
@@ -26,7 +30,7 @@ export default function Environment() {
         fetchForecast();
     }, []);
 
-    // 1) Felder aus Backend
+    // Felder aus dem Backend abrufen
     const fetchFields = async () => {
         setIsLoading(true);
         setError(null);
@@ -41,16 +45,23 @@ export default function Environment() {
         }
     };
 
-    // 2) Forecast: (Aktuelles Weather + 5-Tage, je nach implementierung)
+    // Wettervorhersage abrufen
     const fetchForecast = async () => {
         try {
-            const data = await getDarmstadtForecast();
-            // data.list => ~40 Einträge à 3h => wir filtern 1 Eintrag pro Tag
-            const dailyEntries = data.list.filter((_, idx) => idx % 8 === 0);
+            const [apiData, dbData] = await Promise.all([
+                getDarmstadtForecast(),
+                getWeatherData(),
+            ]);
 
-            // Regenwahrscheinlichkeit random (NUR für Forecast-Demo):
+            if (!apiData || !apiData.list) {
+                throw new Error("Ungültige Datenstruktur von OpenWeather.");
+            }
+
+            const dailyEntries = apiData.list.filter((_, idx) => idx % 8 === 0);
             const transformed = dailyEntries.map((item) => {
-                const randomRain = Math.floor(Math.random() * 101);
+                const dateString = item.dt_txt.split(" ")[0];
+                const dbEntry = dbData.find((entry) => entry.date === dateString);
+
                 return {
                     date: new Date(item.dt_txt).toLocaleDateString("de-DE", {
                         weekday: "short",
@@ -58,9 +69,10 @@ export default function Environment() {
                         month: "numeric",
                     }),
                     temperature: Math.round(item.main.temp),
-                    rainProb: randomRain,
+                    rainProb: dbEntry ? dbEntry.rain_probability : "N/A",
                 };
             });
+
             setForecastData(transformed);
         } catch (err) {
             console.error("Fehler beim Laden der Forecast-Daten:", err);
@@ -68,81 +80,95 @@ export default function Environment() {
         }
     };
 
-    // 3) Button zum Simulieren von Felddaten
-    const handleSimulateData = async () => {
+    // Analyse starten
+    const handleStartAnalysis = async (field) => {
         try {
-            // POST /fields/simulate => Erzeugt neue random Felddaten in DB
-            await axios.post("http://localhost:5001/fields/simulate");
-            // Danach neu laden
-            await fetchFields();
-        } catch (simulateErr) {
-            console.error("Fehler beim Simulieren der Daten:", simulateErr);
-            setError("Fehler beim Simulieren der Sensordaten.");
+            const nutrientResponse = await axios.get(
+                `http://localhost:5001/analysis/${field.id}/optimize-nutrients`
+            );
+            const nutrientMessage =
+                nutrientResponse.data.message || "Keine spezifischen Empfehlungen verfügbar.";
+
+            const waterResponse = await axios.get(
+                `http://localhost:5001/analysis/${field.id}/water-consumption`
+            );
+            const waterData = waterResponse.data;
+
+            setAnalysisField({
+                ...field,
+                nutrientMessage,
+                waterMessage: `Empfohlene Bewässerung: ${waterData.totalWaterNeed.toFixed(1)} Liter/Tag`,
+                rainProbability: `${waterData.rainProbability}%`,
+                temperature: `${waterData.temperature}°C`,
+            });
+        } catch (err) {
+            console.error("Fehler bei der Analyse:", err);
+            alert("Es ist ein Fehler bei der Analyse aufgetreten.");
         }
     };
 
-    // Aktionen in der Tabelle
+    // Details anzeigen
     const handleShowDetails = (field) => {
         setDetailsField(field);
     };
 
-// src/pages/Environment.jsx
-const handleStartAnalysis = async (field) => {
-    try {
-        // 1) Nährstoffanalyse
-        const nutrientResponse = await axios.get(
-            `http://localhost:5001/analysis/${field.id}/optimize-nutrients`
-        );
-        const nutrientMessage = nutrientResponse.data.message || "Die Nährstoffanalyse konnte keine spezifischen Empfehlungen liefern.";
+    // pH-Verlauf abrufen
+    const fetchPhHistoryData = async (fieldId) => {
+        try {
+            const data = await fetchPhHistory(fieldId);
+            setPhData(data);
+            setSelectedFieldId(fieldId);
+        } catch (err) {
+            console.error("Fehler beim Abrufen der pH-Daten:", err);
+        }
+    };
 
-        // 2) Wasseranalyse
-        const waterResponse = await axios.get(
-            `http://localhost:5001/analysis/${field.id}/water-consumption`
-        );
-        //const recommendedIrrigation = waterResponse.data.recommendedIrrigation || 0;
-        const waterInfo = waterResponse.data.info || "Es liegen keine zusätzlichen Informationen zur Wasseranalyse vor.";
+    // pH-Daten simulieren und aktualisieren
+    const handleSimulatePhData = async () => {
+        try {
+            if (!selectedFieldId) {
+                alert("Bitte wählen Sie ein Feld aus, um die pH-Daten zu simulieren.");
+                return;
+            }
+            await simulatePhData(selectedFieldId); // Simulieren der pH-Daten
+            fetchPhHistoryData(selectedFieldId); // Aktualisieren der pH-Daten
+        } catch (err) {
+            console.error("Fehler beim Simulieren der pH-Daten:", err);
+            alert("Fehler beim Simulieren der pH-Daten.");
+        }
+    };
 
-        // Höflichere Zusammenführung der Nachrichten
-        const combinedMessage = `
-Hier sind die Ergebnisse Ihrer Analysen:
+    // Sensordaten aktualisieren
+    const handleSimulateData = async () => {
+        try {
+            await axios.post("http://localhost:5001/fields/simulate");
+            await fetchFields();
+        } catch (simulateErr) {
+            console.error("Fehler beim Simulieren der Sensordaten:", simulateErr);
+            alert("Fehler beim Simulieren der Sensordaten.");
+        }
+    };
 
-**Nährstoffanalyse:**
-${nutrientMessage}
-
-**Wasseranalyse:**
-${waterInfo}
-
-
-        `.trim();
-
-        alert(combinedMessage);
-
-    } catch (err) {
-        console.error("Fehler bei der Analyse:", err);
-        alert("Leider ist bei der Analyse ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.");
-    }
-};
-
+    // Dropdown-Auswahl für pH-Diagramm
+    const handleFieldChange = (fieldId) => {
+        setSelectedFieldId(fieldId);
+        fetchPhHistoryData(fieldId);
+    };
 
     return (
         <div className="pt-16 flex flex-col items-start min-h-screen bg-gray-100 px-6">
-            {/* 1) Wetterbereich */}
+            {/* Wetterbereich */}
             <div className="flex flex-row w-full max-w-5xl mx-auto gap-4">
-                {/* Links: aktuelles Wetter */}
                 <div className="flex-1 bg-blue-50 rounded-md p-4 shadow">
                     <WeatherOverviewEnviroment />
                 </div>
-
-                {/* Rechts: 5-Tage-Prognose */}
                 <div className="flex-1 bg-blue-50 rounded-md p-4 shadow">
-                    {forecastError && (
-                        <div className="text-red-500 mb-2">{forecastError}</div>
-                    )}
+                    {forecastError && <div className="text-red-500 mb-2">{forecastError}</div>}
                     <ForecastOverview forecastData={forecastData} />
                 </div>
             </div>
 
-            {/* 2) Bodendaten-Tabelle */}
+            {/* Tabelle mit Felddaten */}
             <div className="w-full max-w-5xl mx-auto mt-6 bg-white p-4 rounded shadow">
                 <h2 className="text-xl font-bold mb-4">Bodendaten pro Feld</h2>
                 {error && <div className="text-red-500 mb-2">{error}</div>}
@@ -157,7 +183,7 @@ ${waterInfo}
                     />
                 )}
 
-                {/* Button: Neue Zufalls-Sensordaten */}
+                {/* Button zum Simulieren von Sensordaten */}
                 <div className="mt-4">
                     <button
                         onClick={handleSimulateData}
@@ -168,21 +194,54 @@ ${waterInfo}
                 </div>
             </div>
 
-            {/* 3) Platz für Diagramme o.Ä. */}
-            <div className="w-full max-w-5xl mx-auto mt-8 bg-white p-4 rounded shadow">
-                <h2 className="text-lg font-bold mb-2">Diagramme oder zusätzliche Infos</h2>
-                <p className="text-sm text-gray-600">
-                    Hier kannst du pH-Verlauf, Feuchtigkeitsverlauf etc. anzeigen.
-                </p>
-            </div>
-
-            {/* 4) Modal: Feld-Details */}
+            {/* Modal: Feld-Details */}
             {detailsField && (
                 <FieldDetailsModal
                     field={detailsField}
                     onClose={() => setDetailsField(null)}
                 />
             )}
+
+            {/* Modal: Analyse */}
+            {analysisField && (
+                <AnalysisModal
+                    field={analysisField}
+                    onClose={() => setAnalysisField(null)}
+                />
+            )}
+
+            {/* pH-Verlauf */}
+            <div className="w-full max-w-5xl mx-auto mt-8 bg-white p-4 rounded shadow">
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold">pH-Verlauf</h2>
+                    <select
+                        className="border rounded px-4 py-2 bg-white text-black" // Weißer Hintergrund, schwarze Schrift
+                        value={selectedFieldId || ""}
+                        onChange={(e) => handleFieldChange(e.target.value)}
+                    >
+                        <option value="" disabled>
+                            Feld auswählen
+                        </option>
+                        {fields.map((field) => (
+                            <option key={field.id} value={field.id}>
+                                {field.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                {phData.length > 0 ? (
+                    <PhChart phData={phData} />
+                ) : (
+                    <p className="text-black">Wählen Sie ein Feld, um den pH-Verlauf anzuzeigen.</p> // Hinweistext in Schwarz
+                )}
+                <button
+                    onClick={handleSimulatePhData}
+                    className="mt-4 bg-orange-500 text-white px-4 py-2 rounded"
+                >
+                    pH-Daten simulieren
+                </button>
+            </div>
+
         </div>
     );
 }
