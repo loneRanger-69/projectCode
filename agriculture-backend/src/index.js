@@ -10,7 +10,7 @@ import todoRoutes from "./routes/todo.js";
 import weatherRoutes from "./routes/weather.js"; // Importiere die Wetter-Routen
 import dotenv from "dotenv";
 import phRoutes from "./routes/ph.js";
-
+import availableResourceRoutes from "./routes/availableResource.js";
 
 dotenv.config({ path: "./agriculture-backend/.env" });
 console.log("Geladener API_KEY:", process.env.VITE_APP_WEATHERMAP_API_KEY);
@@ -29,6 +29,7 @@ app.use("/kpis", kpisRoutes);
 app.use("/todos", todoRoutes);
 app.use("/weather", weatherRoutes);
 app.use("/ph", phRoutes);
+app.use ("/resource-available", availableResourceRoutes);
 
 // Fehlerbehandlung für nicht gefundene Routen
 app.use((req, res, next) => {
