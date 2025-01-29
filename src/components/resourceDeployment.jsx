@@ -7,6 +7,7 @@ function ResourceDeployment({ onClose }) {
   const [wasser, setWasser] = useState("");
   const [dungemittel, setDungemittel] = useState("");
   const [feldName, setFeldName] = useState("");
+  const [resourceIdToDelete, setResourceIdToDelete] = useState("");
 
   // Daten beim Laden des Popups abrufen
   useEffect(() => {
@@ -42,10 +43,29 @@ function ResourceDeployment({ onClose }) {
     }
   };
 
+  // Handler für das Löschen einer Ressource
+  const handleDeleteResource = async () => {
+    if (!resourceIdToDelete) {
+      alert("Bitte wählen Sie eine Ressource aus.");
+      return;
+    }
+
+    try {
+      await axios.delete(`http://localhost:5001/resource-deployment/resources/${resourceIdToDelete}`);
+      alert(`Ressource mit ID ${resourceIdToDelete} erfolgreich gelöscht.`);
+      setResourceIdToDelete("");
+      // Daten nach dem Löschen erneut abrufen
+      const response = await axios.get("http://localhost:5001/resource-deployment/resources");
+      setResources(response.data);
+    } catch (error) {
+      console.error("Fehler beim Löschen der Ressource:", error);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg w-full max-w-md p-6">
-        <h2 className="text-lg font-bold mb-4">Ressourcen verwalten</h2>
+        <h2 className="text-lg font-bold mb-4">Ressourcen Einsatz verwalten</h2>
 
         {/* Liste der Ressourcen */}
         <div className="mb-4">
@@ -102,13 +122,40 @@ function ResourceDeployment({ onClose }) {
           </button>
         </form>
 
-        {/* Schließen Button */}
-        <button
-          onClick={onClose}
-          className="mt-4 bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
-        >
-          Schließen
-        </button>
+        {/* Auswahlfeld für Ressource zum Löschen */}
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Ressource auswählen:
+          </label>
+          <select
+            value={resourceIdToDelete}
+            onChange={(e) => setResourceIdToDelete(e.target.value)}
+            className="w-full mt-1 p-2 border border-black bg-white text-black rounded-md focus:ring focus:ring-blue-200"
+          >
+            <option value="">Bitte eine Ressource auswählen</option>
+            {resources.map((resource) => (
+              <option key={resource.ID} value={resource.ID}>
+                {resource.FeldName}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex gap-4 mt-4">
+          <button
+            onClick={handleDeleteResource}
+            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+          >
+            Löschen
+          </button>
+
+          <button
+            onClick={onClose}
+            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+          >
+            Schließen
+          </button>
+        </div>
       </div>
     </div>
   );
