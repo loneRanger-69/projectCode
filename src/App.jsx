@@ -5,6 +5,8 @@ import Navbar from "./components/Navbar/Navbar";
 import Home from "./pages/Home";
 import Fields from "./pages/Fields";
 import Environment from "./pages/Environment";
+import ResourceManage from "./components/resourceManage";
+import ResourceDeployment from "./components/resourceDeployment";
 
 function App() {
     return (
@@ -16,6 +18,8 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/fields" element={<Fields />} />
                     <Route path="/environment" element={<Environment />} />
+                    <Route path="/resource-manage" element={<ResourceManage />} />
+                    <Route path="/resource-deployment" element ={<ResourceDeployment/>} />
                 </Routes>
             </div>
         </BrowserRouter>
