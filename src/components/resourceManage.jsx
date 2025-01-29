@@ -92,7 +92,7 @@ function ResourceManage({onClose, onUpdate}) {
   // Formular-Rendering
   return (
     <div>
-      <h2>Ressourcen verwalten</h2>
+      <h2>Verfügbare Ressourcen verwalten</h2>
       <form
         onSubmit={(e) => {
           e.preventDefault();

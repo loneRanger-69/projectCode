@@ -69,7 +69,7 @@ function ResourceDeployment({ onClose }) {
 
         {/* Liste der Ressourcen */}
         <div className="mb-4">
-          <h3 className="text-md font-semibold">Bestehende Ressourcen</h3>
+          <h3 className="text-md font-semibold">Bestehende benutzte Ressourcen</h3>
           <ul>
             {resources.map((resource) => (
               <li key={resource.ID}>
@@ -118,21 +118,21 @@ function ResourceDeployment({ onClose }) {
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
           >
-            Ressource hinzufügen
+            Ressourcen hinzufügen
           </button>
         </form>
 
         {/* Auswahlfeld für Ressource zum Löschen */}
         <div className="mt-4">
           <label className="block text-sm font-medium text-gray-700">
-            Ressource auswählen:
+            Feld auswählen zur Entlastung :
           </label>
           <select
             value={resourceIdToDelete}
             onChange={(e) => setResourceIdToDelete(e.target.value)}
             className="w-full mt-1 p-2 border border-black bg-white text-black rounded-md focus:ring focus:ring-blue-200"
           >
-            <option value="">Bitte eine Ressource auswählen</option>
+            <option value="">Bitte ein Feld auswählen</option>
             {resources.map((resource) => (
               <option key={resource.ID} value={resource.ID}>
                 {resource.FeldName}
