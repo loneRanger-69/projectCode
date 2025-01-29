@@ -33,7 +33,11 @@ function ToDoList() {
         text: newTodo,
         completed: false,
       });
-      setTodos([...todos, response.data]); // Lokale Liste aktualisieren
+  
+      if (response.data && response.data.text) {
+        setTodos([...todos, response.data]); // Nur hinzufügen, wenn ein gültiger Text vorhanden ist
+      }
+      
       setNewTodo(""); // Eingabefeld zurücksetzen
       setShowModal(false); // Modal schließen
     } catch (err) {
@@ -57,20 +61,22 @@ function ToDoList() {
   }
 
   // Aufgabe löschen
-  async function handleDeleteTodo() {
-    if (!selectedDeleteId) {
-      alert("Bitte wählen Sie eine Aufgabe aus!");
-      return;
-    }
-    try {
-      await axios.delete(`http://localhost:5001/todos/${selectedDeleteId}`); // Lösche aus DB
-      setTodos(todos.filter((todo) => todo.id !== selectedDeleteId)); // Lokale Liste aktualisieren
-      setDeleteModal(false); // Modal schließen
-      setSelectedDeleteId(""); // Auswahl zurücksetzen
-    } catch (err) {
-      console.error("Fehler beim Löschen der Aufgabe:", err);
-    }
+  // Aufgabe löschen
+async function handleDeleteTodo() {
+  if (!selectedDeleteId) {
+    alert("Bitte wählen Sie eine Aufgabe aus!");
+    return;
   }
+  try {
+    await axios.delete(`http://localhost:5001/todos/${selectedDeleteId}`); // Lösche aus DB
+    
+    fetchTodos(); // Aufgabenliste nach dem Löschen neu laden
+    setDeleteModal(false); // Modal schließen
+    setSelectedDeleteId(""); // Auswahl zurücksetzen
+  } catch (err) {
+    console.error("Fehler beim Löschen der Aufgabe:", err);
+  }
+}
 
   return (
     <div className="bg-white rounded-lg p-4 shadow-md relative">
