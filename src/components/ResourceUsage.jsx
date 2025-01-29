@@ -10,6 +10,7 @@ import {
   Legend,
 } from "chart.js";
 import ResourceManage from "./resourceManage";
+import ResourceDeployment from "./resourceDeployment";
 import axios from "axios";
 
 // ChartJS-Registrierung
@@ -24,43 +25,54 @@ ChartJS.register(
 
 function ResourceUsage() {
   const [showManage, setShowManage] = useState(false);
+  const [showDeploy, setShowDeploy] = useState(false); // Neuer State für Deployment-Modal
   const [chartData, setChartData] = useState({
-    labels: ["Dünger", "Wasser"], // Nur noch zwei Kategorien
+    labels: ["Dünger", "Wasser"],
     datasets: [
       {
-        label: "Auslastung (%)",
-        data: [0, 0], // Initialwerte
-        backgroundColor: ["#FACC15", "#60A5FA"], // Nur noch zwei Farben
+        label: "Verfügbarkeit (%)",
+        data: [0, 0],
+        backgroundColor: ["#FACC15", "#60A5FA"],
       },
     ],
   });
-  const [userId] = useState("current_user_id"); // Hier durch echte User-ID ersetzen
 
-  // Daten vom Server abrufen
   const fetchResourceData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5001/resource-usage/${userId}`);
-      if (response.data) {
-        const newData = [
-          response.data.dunger || 0,
-          response.data.wasser || 0
-        ];
-        setChartData({
-          ...chartData,
-          datasets: [{
+      // Abrufen der beiden Endpunktdaten
+      const [availableResponse, deploymentResponse] = await Promise.all([
+        axios.get("http://localhost:5001/resource-available/total"),
+        axios.get("http://localhost:5001/resource-deployment/total"),
+      ]);
+
+      const availableData = availableResponse.data;
+      const deploymentData = deploymentResponse.data;
+
+      // Berechnungen
+      const remainingWasser = availableData.totalWasser - deploymentData.totalWasser;
+      const remainingDungemittel = availableData.totalDungemittel - deploymentData.totalDungemittel;
+
+      const percentWasser = (remainingWasser / availableData.totalWasser) * 100;
+      const percentDungemittel = (remainingDungemittel / availableData.totalDungemittel) * 100;
+
+      // Aktualisierung der Diagrammdaten
+      setChartData({
+        ...chartData,
+        datasets: [
+          {
             ...chartData.datasets[0],
-            data: newData
-          }]
-        });
-      }
+            data: [percentDungemittel, percentWasser],
+          },
+        ],
+      });
     } catch (error) {
-      console.error("Datenabruf fehlgeschlagen:", error);
+      console.error("Fehler beim Abrufen oder Berechnen der Daten:", error);
     }
   };
 
   useEffect(() => {
     fetchResourceData();
-  }, [userId, showManage]);
+  }, [showManage, showDeploy]);
 
   const options = {
     responsive: true,
@@ -79,35 +91,56 @@ function ResourceUsage() {
         beginAtZero: true,
         max: 100,
         ticks: {
-          callback: function(value) {
+          callback: function (value) {
             return value + "%";
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   };
 
   return (
     <div className="bg-white rounded-lg p-4 shadow-md relative min-h-[350px]">
       <h2 className="text-lg font-bold mb-4">Ressourcenauslastung</h2>
-      
+
       <div className="h-64 mb-4">
         <Bar data={chartData} options={options} />
       </div>
 
-      <button 
-        onClick={() => setShowManage(true)}
-        className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
-      >
-        Ressourcen verwalten
-      </button>
+      <div className="flex gap-4"> {/* Flex-Container für Buttons */}
+        <button
+          onClick={() => setShowManage(true)}
+          className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
+        >
+          Ressourcen verwalten
+        </button>
+
+        <button
+          onClick={() => setShowDeploy(true)}
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Ressource einsetzen
+        </button>
+      </div>
 
       {showManage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-md p-6">
-            <ResourceManage 
-              onClose={() => setShowManage(false)} 
-              userId={userId}
+            <ResourceManage
+              onClose={() => setShowManage(false)}
+              userId="current_user_id"
+              onUpdate={fetchResourceData}
+            />
+          </div>
+        </div>
+      )}
+
+      {showDeploy && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg w-full max-w-md p-6">
+            <ResourceDeployment
+              onClose={() => setShowDeploy(false)}
+              userId="current_user_id"
               onUpdate={fetchResourceData}
             />
           </div>
