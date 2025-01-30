@@ -19,6 +19,11 @@ Es nutzt [Vite](https://vitejs.dev/) als Build-Tool und [Tailwind CSS](https://t
    ```bash
    npm install
 
+3. **Server starten**:
+   ```bash
+   //Im Ordner agriculture-backend folgende Datei starten
+   node src/index.js
+
 **PropTypes-Hinweis**
 
 Wir verwenden PropTypes, um die Props unserer React-Komponenten zur Laufzeit zu validieren.
