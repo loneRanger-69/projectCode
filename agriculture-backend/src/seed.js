@@ -1,3 +1,5 @@
+//Code von Victor Bestea - 752622
+
 // Importiere die Datenbankverbindung aus der db.js-Datei
 import db from "./db.js";
 
