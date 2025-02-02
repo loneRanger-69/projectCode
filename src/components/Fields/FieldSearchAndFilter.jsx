@@ -1,3 +1,4 @@
+//Code von Victor Bestea - 752622
 // Importiere PropTypes zur Validierung der Props und useState für den lokalen Zustand
 import PropTypes from "prop-types";
 import { useState } from "react";
