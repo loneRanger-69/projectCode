@@ -1,9 +1,11 @@
+// Importiere das Express-Framework und die Datenbankverbindung
 import express from "express";
 import db from "../db.js";
 
+// Initialisiere den Router von Express
 const router = express.Router();
 
-// GET: Alle Felder abrufen
+// Routen-Handler: Alle Felder abrufen
 router.get("/", async (req, res) => {
     try {
         const fields = await db("fields").select("*");

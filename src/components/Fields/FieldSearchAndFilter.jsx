@@ -21,7 +21,7 @@ export default function FieldSearchAndFilter({ onSearch, onFilterStatus, onFilte
                     onClick={() => setIsStatusOpen((prev) => !prev)}
                     className="bg-white text-black border border-gray-300 rounded px-4 py-2"
                 >
-                    Status ▼
+                    zu erledigen ▼
                 </button>
                 {isStatusOpen && (
                     <div className="absolute bg-white text-black shadow-lg rounded mt-2 z-10">
@@ -134,12 +134,12 @@ export default function FieldSearchAndFilter({ onSearch, onFilterStatus, onFilte
                         </button>
                         <button
                             onClick={() => {
-                                onFilterSize(">300 Hektar");
+                                onFilterSize(">100 Hektar");
                                 setIsSizeOpen(false);
                             }}
                             className="bg-white block px-4 py-2 w-full text-left"
                         >
-                            &gt; 300 Hektar
+                            &gt; 100 Hektar
                         </button>
                     </div>
                 )}

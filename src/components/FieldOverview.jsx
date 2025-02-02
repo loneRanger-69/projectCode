@@ -43,7 +43,7 @@ export default function FieldOverview() {
                         <tr>
                             <th className="text-left">Feldname</th>
                             <th className="text-left">Größe</th>
-                            <th className="text-left">Status</th>
+                            <th className="text-left">zu erledigen</th>
                         </tr>
                     </thead>
                     <tbody>

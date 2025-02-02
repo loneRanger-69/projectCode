@@ -8,7 +8,7 @@ export default function FieldTable({ fields, onDetails, onEdit, onDelete }) {
                     <tr>
                         <th className="px-4 py-2">Feldname</th>
                         <th className="px-4 py-2">Größe (ha)</th>
-                        <th className="px-4 py-2">Status</th>
+                        <th className="px-4 py-2">zu erledigen</th>
                         <th className="px-4 py-2">Aktionen</th>
                     </tr>
                 </thead>

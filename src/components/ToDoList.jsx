@@ -31,7 +31,7 @@ function ToDoList() {
     try {
       const response = await axios.post("http://localhost:5001/todos", {
         text: newTodo,
-        completed: false,
+        //completed: false,
       });
   
       if (response.data && response.data.text) {
