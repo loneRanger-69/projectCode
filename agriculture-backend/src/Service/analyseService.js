@@ -1,3 +1,5 @@
+//Dieser Code wurde bearbeitet von Philipp Pister
+
 import { getFieldById } from "./fieldService.js";
 import { cropOptimalValues } from "../data/cropOptimalValues.js";
 import { fetchWeatherDataFromDB } from "../routes/weather.js"; // Importiere Wetterdaten aus der Route

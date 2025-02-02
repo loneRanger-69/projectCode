@@ -1,4 +1,4 @@
-// src/pages/Environment.jsx
+// src/pages/Environment.jsx || Diese Seite wurde bearbeitet von Philipp Pister
 
 import { useState, useEffect } from "react";
 import axios from "axios";

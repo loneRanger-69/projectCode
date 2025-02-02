@@ -1,4 +1,4 @@
-// src/routes/analysis.js
+// src/routes/analysis.js Dieser Code wurde bearbeitet von Philipp Pister
 
 import express from "express";
 import { waterConsumptionAnalysis, optimizeNutrients } from "../Service/analyseService.js";

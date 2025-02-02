@@ -1,3 +1,5 @@
+//Dieser Code wurde bearbeitet von Philipp Pister
+
 import { Bar } from "react-chartjs-2"; // Importiere die Bar-Chart-Komponente von Chart.js
 
 /**

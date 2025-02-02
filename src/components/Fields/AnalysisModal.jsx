@@ -1,4 +1,4 @@
-// src/components/Fields/AnalysisModal.jsx
+// src/components/Fields/AnalysisModal.jsx //Dieser Code wurde bearbeitet von Philipp Pister
 
 import PropTypes from "prop-types";
 

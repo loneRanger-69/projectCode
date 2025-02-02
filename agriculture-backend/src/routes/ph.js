@@ -1,3 +1,5 @@
+//Dieser Code wurde bearbeitet von Philipp Pister
+
 import express from "express";
 import db from "../db.js";
 

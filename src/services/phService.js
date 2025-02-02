@@ -1,4 +1,6 @@
+//Diese Seite wurde bearbeitet von Philipp Pister
 import axios from "axios";
+
 
 export async function fetchPhHistory(fieldId) {
     const response = await axios.get(`http://localhost:5001/ph/history/${fieldId}`);
