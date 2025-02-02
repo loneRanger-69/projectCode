@@ -1,4 +1,4 @@
-// src/components/Navbar/Navbar.jsx
+// src/components/Navbar/Navbar.jsx Dieser Code wurde bearbeitet von Philipp Pister
 
 import { Link } from "react-router-dom";
 

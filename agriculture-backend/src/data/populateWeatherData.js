@@ -1,3 +1,5 @@
+//Dieser Code wurde bearbeitet von Philipp Pister
+
 import db from "../db.js";
 
 async function populateWeatherData() {

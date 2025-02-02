@@ -1,4 +1,4 @@
-// src/data/cropOptimalValues.js
+// src/data/cropOptimalValues.js //Dieser Code wurde bearbeitet von Philipp Pister
 export const cropOptimalValues = {
     Sojabohnen: { optimalPh: 6.5, optimalNutrients: 15 },
     Weizen: { optimalPh: 6.8, optimalNutrients: 12 },
