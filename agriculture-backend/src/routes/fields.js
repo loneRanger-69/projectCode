@@ -1,3 +1,5 @@
+//Code von Victor Bestea - 752622
+
 // Importiere das Express-Framework und die Datenbankverbindung
 import express from "express"; // Import von Express zur Erstellung von HTTP-Servern
 import db from "../db.js"; // Import der Datenbankverbindung aus der db.js-Datei
