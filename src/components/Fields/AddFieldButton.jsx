@@ -1,3 +1,4 @@
+//Code von Victor Bestea - 752622
 // Importiere PropTypes, um die Typen der Props zu validieren
 import PropTypes from "prop-types";
 
