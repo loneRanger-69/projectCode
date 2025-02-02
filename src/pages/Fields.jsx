@@ -91,8 +91,8 @@ export default function Fields() {
             filtered = fields.filter((field) => Number(field.size) < 30);
         } else if (size === "30-100 Hektar") {
             filtered = fields.filter((field) => Number(field.size) >= 30 && Number(field.size) <= 100);
-        } else if (size === ">300 Hektar") {
-            filtered = fields.filter((field) => Number(field.size) > 300);
+        } else if (size === ">100 Hektar") {
+            filtered = fields.filter((field) => Number(field.size) > 100);
         }
         setFilteredFields(filtered);
     };

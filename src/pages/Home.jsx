@@ -18,7 +18,7 @@ function Home() {
                 <FieldOverview />
                 <ResourceUsage />
                 <ToDoList />
-                <KPIOverview />
+                {/* <KPIOverview /> */}  {/* Hier auskommentiert weil Funktion überflüssig */}
             </div>
         </div>
     );

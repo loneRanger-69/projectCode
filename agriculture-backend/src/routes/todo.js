@@ -26,9 +26,8 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const { text, completed } = req.body;
-    // In DB einfügen:
-    const [id] = await db("todos").insert({ text, completed });
-    // Neu erzeugten Datensatz zurückgeben:
+    // Sicherstellen, dass 'completed' als Boolean gespeichert wird
+    const [id] = await db("todos").insert({ text, completed: !!completed });
     const newTodo = await db("todos").where({ id }).first();
     res.status(201).json(newTodo);
   } catch (error) {
