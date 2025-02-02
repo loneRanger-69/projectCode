@@ -2,7 +2,7 @@ import express from "express";
 import db from "../db.js";
 import axios from "axios";
 
-const router = express.Router();
+const router = express.Router(); //Code von Muhammad Ilzam Fachreza Sianipar (768835)
 
 // OpenWeatherMap API-Details
 const CURRENT_WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather";

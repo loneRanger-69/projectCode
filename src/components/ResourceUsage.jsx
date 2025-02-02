@@ -1,3 +1,5 @@
+//Code von Muhammad Ilzam Fachreza Sianipar (768835)
+
 import React, { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import {

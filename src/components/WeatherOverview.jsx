@@ -1,3 +1,5 @@
+//Code von Muhammad Ilzam Fachreza Sianipar (768835)
+
 import { useEffect, useState } from "react";
 import { getDarmstadtWeather, getWeatherData } from "../services/weatherService";
 
