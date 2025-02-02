@@ -1,3 +1,6 @@
+//Code von Victor Bestea - 752622
+
+
 import db from "./db.js";
 
 async function migrate() {
