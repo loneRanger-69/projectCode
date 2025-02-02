@@ -1,3 +1,5 @@
+//Code von Victor Bestea - 752622
+
 // Importiere das Knex-Modul, das als SQL-Query-Builder dient
 import knex from "knex";
 
